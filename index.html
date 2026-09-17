@@ -1,0 +1,1982 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tagalog Learning Game Prototype</title>
+    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            background-color: #111;
+            font-family: 'Press Start 2P', monospace;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            overflow: hidden;
+            color: #fff;
+        }
+
+        #game-container {
+            width: 100%;
+            max-width: 480px;
+            height: 100vh;
+            max-height: 850px;
+            background-image: url('Home Background.jpg');
+            background-size: cover;
+            background-position: center;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px;
+            box-shadow: 0 0 20px rgba(0,0,0,0.8);
+            transition: background-image 0.5s ease-in-out;
+        }
+
+        .screen {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            background: rgba(0, 0, 0, 0.5);
+            transition: opacity 0.5s ease;
+            padding: 20px;
+            z-index: 10;
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        .start-content {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 20px;
+            width: 100%;
+            padding: 0 10px;
+        }
+
+        .logo-img {
+            width: 100%;
+            max-width: 430px;
+            height: auto;
+            image-rendering: pixelated;
+        }
+
+        .start-img-btn {
+            background: none;
+            border: none;
+            cursor: pointer;
+            padding: 0;
+            width: 240px;
+            image-rendering: pixelated;
+            animation: floatUpDown 1.5s ease-in-out infinite;
+            transition: transform 0.1s;
+        }
+
+        .start-img-btn img {
+            width: 100%;
+            height: auto;
+            image-rendering: pixelated;
+            display: block;
+        }
+
+        @keyframes floatUpDown {
+            0%, 100% {
+                transform: translateY(0);
+            }
+            50% {
+                transform: translateY(-10px);
+            }
+        }
+
+        .pixel-btn {
+            background-color: #f39c12;
+            color: #fff;
+            border: 4px solid #fff;
+            padding: 15px 25px;
+            font-family: 'Press Start 2P', monospace;
+            font-size: 14px;
+            cursor: pointer;
+            box-shadow: 4px 4px 0px #000;
+            image-rendering: pixelated;
+            transition: transform 0.1s, background-color 0.1s;
+            text-transform: uppercase;
+        }
+
+        .pixel-btn:active {
+            transform: translate(2px, 2px);
+            box-shadow: 2px 2px 0px #000;
+        }
+
+        .back-pixel-btn {
+            position: absolute;
+            top: 15px;
+            left: 15px;
+            background-color: #e74c3c;
+            color: #fff;
+            border: 3px solid #fff;
+            padding: 8px 12px;
+            font-family: 'Press Start 2P', monospace;
+            font-size: 8px;
+            cursor: pointer;
+            box-shadow: 3px 3px 0px #000;
+            image-rendering: pixelated;
+            z-index: 30;
+            transition: transform 0.1s, background-color 0.1s;
+        }
+
+        .back-pixel-btn:active {
+            transform: translate(2px, 2px);
+            box-shadow: 1px 1px 0px #000;
+        }
+
+        .char-select-container {
+            display: flex;
+            gap: 25px;
+            margin-top: 20px;
+        }
+
+        .char-option {
+            background: rgba(0, 0, 0, 0.8);
+            border: 6px solid #fff;
+            padding: 25px 20px;
+            cursor: pointer;
+            text-align: center;
+            box-shadow: 6px 6px 0px #000;
+            transition: transform 0.2s;
+        }
+
+        .char-option:hover {
+            transform: scale(1.08);
+            border-color: #f39c12;
+        }
+
+        .sprite-preview {
+            width: 140px;
+            height: 140px;
+            image-rendering: pixelated;
+            background-size: 560px 140px;
+            margin-bottom: 15px;
+        }
+
+        #preview-boy {
+            background-image: url('Idle boy.png');
+            animation: idleAnimation 0.8s steps(4) infinite;
+        }
+
+        #preview-girl {
+            background-image: url('Idle Girl.png');
+            animation: idleAnimation 0.8s steps(4) infinite;
+        }
+
+        @keyframes idleAnimation {
+            from { background-position: 0px; }
+            to { background-position: -560px; }
+        }
+
+        .input-group {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            align-items: center;
+            width: 100%;
+        }
+
+        input[type="text"] {
+            width: 80%;
+            padding: 12px;
+            font-family: 'Press Start 2P', monospace;
+            font-size: 12px;
+            border: 4px solid #fff;
+            background: #222;
+            color: #fff;
+            text-align: center;
+            box-shadow: 4px 4px 0px #000;
+            outline: none;
+        }
+
+        #gameplay-screen {
+            background: transparent;
+            justify-content: flex-end;
+            pointer-events: auto;
+            padding-bottom: 20px;
+            transition: opacity 0.5s ease;
+        }
+
+        #gameplay-screen.text-top {
+            justify-content: flex-start;
+            padding-top: 65px;
+            padding-bottom: 20px;
+        }
+
+        .character-display {
+            position: absolute;
+            bottom: 40px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 220px;
+            height: 380px;
+            background-size: contain;
+            background-repeat: no-repeat;
+            background-position: bottom center;
+            image-rendering: pixelated;
+            z-index: 1; 
+            pointer-events: none;
+            transition: opacity 0.5s ease;
+        }
+
+        .two-character-display {
+            position: absolute;
+            bottom: 40px;
+            width: 100%;
+            height: 380px;
+            z-index: 1;
+            pointer-events: none;
+        }
+
+        .left-char {
+            position: absolute;
+            left: 15px;
+            bottom: 0;
+            width: 150px;
+            height: 320px;
+            background-size: contain;
+            background-repeat: no-repeat;
+            background-position: bottom center;
+            image-rendering: pixelated;
+            transition: transform 0.3s ease, width 0.3s ease, height 0.3s ease;
+        }
+
+        .right-char {
+            position: absolute;
+            right: 15px;
+            bottom: 0;
+            width: 150px;
+            height: 320px;
+            background-size: contain;
+            background-repeat: no-repeat;
+            background-position: bottom center;
+            image-rendering: pixelated;
+            transition: transform 0.3s ease, width 0.3s ease, height 0.3s ease;
+        }
+
+        .idle-npc-sprite {
+            transform: scale(0.82);
+            transform-origin: bottom center;
+        }
+
+        .grandma-npc {
+            width: 190px !important;
+            height: 380px !important;
+            bottom: 10px !important;
+        }
+
+        .mano-guide-sprite {
+            left: 15px !important;
+            transform: none !important;
+            width: 150px !important;
+            height: 320px !important;
+        }
+
+        @media (max-width: 380px) {
+            .character-display { width: 190px; height: 340px; }
+            .left-char { width: 128px; height: 280px; left: 10px; }
+            .right-char { width: 128px; height: 280px; right: 10px; }
+            .grandma-npc { width: 160px !important; height: 330px !important; }
+            .mano-guide-sprite { width: 120px !important; height: 260px !important; left: 10px !important; }
+        }
+
+        .dialogue-box {
+            width: 100%;
+            background: rgba(0, 0, 0, 0.9);
+            border: 4px solid #fff;
+            border-radius: 4px;
+            padding: 15px;
+            box-shadow: inset 0 0 10px rgba(0,0,0,0.5), 4px 4px 0px #000;
+            min-height: 145px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            cursor: pointer;
+            z-index: 5;
+        }
+
+        #speaker-name {
+            font-size: 10px;
+            color: #f39c12;
+            margin-bottom: 6px;
+            text-transform: uppercase;
+        }
+
+        .dialogue-lang {
+            font-size: 8px;
+            line-height: 1.4;
+            margin-bottom: 4px;
+            word-spacing: 1px;
+        }
+
+        #dialogue-main { color: #f39c12; }
+        #dialogue-sub { color: #fff; }
+        #dialogue-id { color: #3498db; }
+
+        .next-prompt {
+            font-size: 8px;
+            color: #f39c12;
+            text-align: right;
+            margin-top: 6px;
+            animation: blink 1s infinite;
+        }
+
+        @keyframes blink {
+            0%, 50% { opacity: 1; }
+            51%, 100% { opacity: 0; }
+        }
+
+        #minigame-screen {
+            background: rgba(0, 0, 0, 0.85);
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            z-index: 20;
+        }
+
+        .minigame-card {
+            background: rgba(20, 20, 20, 0.95);
+            border: 4px solid #fff;
+            padding: 20px;
+            width: 100%;
+            max-width: 420px;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            box-shadow: 6px 6px 0px #000;
+            text-align: center;
+        }
+
+        .sentence-container {
+            font-size: 10px;
+            line-height: 2;
+            color: #fff;
+        }
+
+        .drop-zone {
+            display: inline-block;
+            width: 130px;
+            height: 35px;
+            border: 3px dashed #f39c12;
+            background: #222;
+            vertical-align: middle;
+            text-align: center;
+            line-height: 29px;
+            color: #f39c12;
+            font-size: 9px;
+            transition: background-color 0.2s ease;
+        }
+
+        .drop-zone.filled {
+            animation: wordDropIn 0.4s ease-out;
+            border-style: solid;
+        }
+
+        @keyframes wordDropIn {
+            0% { transform: translateY(-18px) scale(0.7); opacity: 0; }
+            60% { transform: translateY(4px) scale(1.05); opacity: 1; }
+            100% { transform: translateY(0) scale(1); }
+        }
+
+        .sentence-container.flash-correct {
+            animation: flashGreen 0.5s ease-in-out 2;
+        }
+
+        @keyframes flashGreen {
+            0%, 100% { background-color: transparent; }
+            50% { background-color: rgba(46, 204, 113, 0.35); }
+        }
+
+        .options-container {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-top: 10px;
+        }
+
+        .drag-item {
+            background-color: #f39c12;
+            color: #fff;
+            border: 3px solid #fff;
+            padding: 10px 15px;
+            font-family: 'Press Start 2P', monospace;
+            font-size: 9px;
+            cursor: pointer;
+            box-shadow: 3px 3px 0px #000;
+            user-select: none;
+            transition: transform 0.1s, background-color 0.1s;
+        }
+
+        .drag-item:active {
+            transform: translate(2px, 2px);
+            box-shadow: 1px 1px 0px #000;
+        }
+
+        .drag-item:disabled,
+        .drag-item.item-disabled {
+            opacity: 0.5;
+            pointer-events: none;
+        }
+
+        .drag-item.wrong-choice {
+            background-color: #e74c3c;
+            opacity: 1 !important;
+        }
+
+        .mg-instruction {
+            font-size: 7px;
+            color: #f39c12;
+            line-height: 1.5;
+            background: rgba(243, 156, 18, 0.1);
+            border: 2px dashed #f39c12;
+            padding: 8px;
+        }
+
+        .quiz-choices-area {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .quiz-choice-btn {
+            background-color: #222;
+            color: #fff;
+            border: 3px solid #f39c12;
+            padding: 12px 10px;
+            font-family: 'Press Start 2P', monospace;
+            font-size: 9px;
+            cursor: pointer;
+            box-shadow: 3px 3px 0px #000;
+            transition: transform 0.1s, background-color 0.1s;
+            text-transform: none;
+        }
+
+        .quiz-choice-btn:active {
+            transform: translate(2px, 2px);
+            box-shadow: 1px 1px 0px #000;
+        }
+
+        .quiz-choice-btn:disabled {
+            cursor: default;
+        }
+
+        .quiz-choice-btn.correct-choice {
+            background-color: #2ecc71;
+            border-color: #fff;
+            color: #000;
+        }
+
+        .quiz-choice-btn.wrong-choice {
+            background-color: #e74c3c;
+            border-color: #fff;
+        }
+
+        h2 {
+            font-size: 14px;
+            text-align: center;
+            margin-bottom: 20px;
+            color: #f39c12;
+            text-shadow: 2px 2px 0px #000;
+        }
+
+        #review-screen {
+            background: rgba(0, 0, 0, 0.85);
+            justify-content: flex-start;
+            align-items: center;
+            padding: 20px;
+            z-index: 25;
+            overflow-y: auto;
+        }
+
+        .review-card {
+            background: rgba(20, 20, 20, 0.95);
+            border: 4px solid #fff;
+            padding: 15px;
+            width: 100%;
+            max-width: 440px;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            box-shadow: 6px 6px 0px #000;
+            margin-top: 5px;
+            margin-bottom: 15px;
+            max-height: 620px;
+            overflow-y: auto;
+        }
+
+        .review-logo {
+            width: 100%;
+            max-width: 200px;
+            height: auto;
+            image-rendering: pixelated;
+            margin-top: 5px;
+            margin-bottom: 5px;
+        }
+
+        .review-item {
+            border-bottom: 2px dashed #444;
+            padding-bottom: 8px;
+        }
+
+        .review-item:last-child {
+            border-bottom: none;
+        }
+
+        .review-title {
+            font-size: 8px;
+            color: #f39c12;
+            margin-bottom: 3px;
+        }
+
+        .review-desc {
+            font-size: 7px;
+            line-height: 1.4;
+            color: #fff;
+        }
+
+        .review-nav {
+            display: flex;
+            justify-content: space-between;
+            width: 100%;
+            max-width: 440px;
+            gap: 10px;
+            margin-bottom: 10px;
+        }
+
+        #glossary-screen {
+            background: rgba(0, 0, 0, 0.9);
+            justify-content: flex-start;
+            align-items: center;
+            padding: 20px;
+            z-index: 25;
+            overflow-y: auto;
+        }
+
+        .vocab-category {
+            font-size: 9px;
+            color: #f39c12;
+            text-shadow: 1px 1px 0px #000;
+            margin-top: 14px;
+            margin-bottom: 8px;
+            border-bottom: 2px solid #f39c12;
+            padding-bottom: 4px;
+        }
+
+        .vocab-category:first-child {
+            margin-top: 0;
+        }
+
+        .vocab-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 7px;
+        }
+
+        .vocab-table th {
+            color: #f39c12;
+            text-align: left;
+            padding: 4px 3px;
+            border-bottom: 2px solid #555;
+        }
+
+        .vocab-table td {
+            color: #fff;
+            padding: 5px 3px;
+            border-bottom: 1px dashed #333;
+            line-height: 1.4;
+        }
+
+        .vocab-table td.vocab-en {
+            color: #3498db;
+        }
+
+        .vocab-table td.vocab-ph {
+            color: #f39c12;
+        }
+
+        .vocab-table td.vocab-id {
+            color: #2ecc71;
+        }
+
+        #transition-screen {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: #000;
+            color: #fff;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 30;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 1s ease;
+        }
+
+        #transition-text {
+            font-size: 12px;
+            text-align: center;
+            color: #f39c12;
+        }
+
+        .jeep-image-overlay {
+            position: absolute;
+            top: 15px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 210px;
+            max-width: 65%;
+            border: 4px solid #f39c12;
+            box-shadow: 6px 6px 0px #000;
+            image-rendering: pixelated;
+            z-index: 8;
+            animation: jeepFlash 1.1s ease-in-out infinite alternate;
+            pointer-events: none;
+        }
+
+        @keyframes jeepFlash {
+            from { opacity: 0.85; transform: translateX(-50%) scale(0.97); }
+            to { opacity: 1; transform: translateX(-50%) scale(1.03); }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Audio Elements -->
+    <audio id="bg-music" src="backgrond music.mp3" loop></audio>
+    <audio id="gamestart-sfx" src="gamestart.mp3"></audio>
+    <audio id="talking-sfx" src="Talking sfx.mp3"></audio>
+    <audio id="correct-sfx" src="correct.mp3"></audio>
+    <audio id="wrong-sfx" src="wrong.mp3"></audio>
+
+    <div id="game-container">
+        <!-- SCREEN 1: Start Button -->
+        <div id="start-screen" class="screen">
+            <div class="start-content">
+                <img src="NOBGLOGO.png" alt="Game Logo" class="logo-img">
+                <button class="start-img-btn" onclick="startGame()">
+                    <img src="startbutton.png" alt="Start Game">
+                </button>
+            </div>
+        </div>
+
+        <!-- SCREEN 2: Gender Selection -->
+        <div id="gender-screen" class="screen hidden">
+            <button class="back-pixel-btn" onclick="goBackToStart()">Back</button>
+            <h2>Select Your Character</h2>
+            <div class="char-select-container">
+                <div class="char-option" onclick="selectGender('boy')">
+                    <div id="preview-boy" class="sprite-preview"></div>
+                    <p style="font-size: 12px;">Boy</p>
+                </div>
+                <div class="char-option" onclick="selectGender('girl')">
+                    <div id="preview-girl" class="sprite-preview"></div>
+                    <p style="font-size: 12px;">Girl</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- SCREEN 3: Name Input -->
+        <div id="name-screen" class="screen hidden">
+            <button class="back-pixel-btn" onclick="goBackToGender()">Back</button>
+            <div class="input-group">
+                <h2 id="name-prompt-title">Enter Character Name</h2>
+                <input type="text" id="player-name-input" placeholder="Type name..." maxlength="12">
+                <button class="pixel-btn" onclick="saveName()">Confirm</button>
+            </div>
+        </div>
+
+        <!-- SCREEN 4: Storyline / Dialogue -->
+        <div id="gameplay-screen" class="screen hidden">
+            <button class="back-pixel-btn" onclick="goBackDialogue()">Back</button>
+            <div id="single-char-container" class="character-display"></div>
+            
+            <div id="two-char-container" class="two-character-display hidden">
+                <div id="left-player-sprite" class="left-char"></div>
+                <div id="right-npc-sprite" class="right-char"></div>
+            </div>
+
+            <img id="jeep-overlay-img" src="jeep.jpg" alt="Philippine Jeepney" class="jeep-image-overlay hidden">
+
+            <div class="dialogue-box" onclick="advanceDialogue()">
+                <div>
+                    <div id="speaker-name">Character</div>
+                    <div id="dialogue-main" class="dialogue-lang">Main text</div>
+                    <div id="dialogue-sub" class="dialogue-lang">Sub text</div>
+                    <div id="dialogue-id" class="dialogue-lang">Bahasa Indonesia text</div>
+                </div>
+                <div class="next-prompt">▼ CLICK TO CONTINUE</div>
+            </div>
+        </div>
+
+        <!-- SCREEN 5: Fill-in-the-Blank Mini-Game Screen -->
+        <div id="minigame-screen" class="screen hidden">
+            <button class="back-pixel-btn" onclick="goBackMinigame()">Back</button>
+            <div class="minigame-card">
+                <h2 id="mg-title">Tagalog Challenge</h2>
+                <div class="mg-instruction">👉 Tap the correct word to fill in the blank!</div>
+                <div class="sentence-container" id="mg-sentence-area">
+                    Complete your introduction:<br><br>
+                    <div class="drop-zone" id="dropzone">[ ? ]</div> <span id="mg-player-name">Name</span>!
+                </div>
+                <div id="mg-feedback" style="font-size: 8px; min-height: 20px;"></div>
+                <div class="options-container" id="mg-options-area">
+                    <div class="drag-item" onclick="checkMinigameAnswer('opt-akosi')" id="opt-akosi">Ako si</div>
+                    <div class="drag-item" onclick="checkMinigameAnswer('opt-galing')" id="opt-galing">Galing ako</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- SCREEN 6: Learnings Review Screen (Multi-page breakdown) -->
+        <div id="review-screen" class="screen hidden">
+            <img src="NOBGLOGO.png" alt="Game Logo" class="review-logo">
+            <h2 id="review-header-title">Learnings & Usage Guide (1/2)</h2>
+            <div class="review-card" id="review-card-content">
+                <!-- Dynamically populated review pages -->
+            </div>
+            <div class="review-nav">
+                <button class="pixel-btn" id="prev-page-btn" onclick="changeReviewPage(-1)" style="font-size: 8px; padding: 10px;">Prev</button>
+                <button class="pixel-btn" id="next-page-btn" onclick="changeReviewPage(1)" style="font-size: 8px; padding: 10px;">Next</button>
+            </div>
+        </div>
+
+        <!-- SCREEN 7: Fill-in-the-Blank Word Game -->
+        <div id="quiz-screen" class="screen hidden">
+            <button class="back-pixel-btn" onclick="goBackToReviewFromQuiz()">Back</button>
+            <div class="minigame-card">
+                <h2 id="quiz-title">Salitang Hamon! (Word Challenge)</h2>
+                <div id="quiz-progress" style="font-size: 8px; color: #f39c12;">Question 1 of 10</div>
+                <div class="sentence-container" id="quiz-question-text">Loading...</div>
+                <div id="quiz-choices-area" class="quiz-choices-area"></div>
+                <div id="quiz-feedback" style="font-size: 8px; min-height: 24px; line-height: 1.6;"></div>
+            </div>
+        </div>
+
+        <!-- SCREEN 8: Word Game Results -->
+        <div id="quiz-results-screen" class="screen hidden">
+            <div class="minigame-card">
+                <h2>Tapos Na! (All Done!)</h2>
+                <div id="quiz-score-text" style="font-size: 11px; color: #fff; line-height: 1.8;"></div>
+                <button class="pixel-btn" onclick="startQuiz()" style="width: 100%;">Try Again</button>
+                <button class="pixel-btn" onclick="openGlossary()" style="width: 100%; background-color: #2ecc71; color: #000;">📖 Word Bank (PH-EN-ID)</button>
+                <button class="pixel-btn" onclick="backToReviewFromResults()" style="width: 100%; background-color: #555;">Back to Guide</button>
+                <button class="pixel-btn" onclick="location.reload()" style="width: 100%; background-color: #e74c3c;">Play Story Again</button>
+            </div>
+        </div>
+
+        <!-- SCREEN 9: Word Bank / Glossary (Tagalog - English - Indonesian) -->
+        <div id="glossary-screen" class="screen hidden">
+            <img src="NOBGLOGO.png" alt="Game Logo" class="review-logo">
+            <h2>Salitang Aklat (Word Bank)</h2>
+            <div class="review-card" id="glossary-content">
+                <!-- Dynamically populated vocabulary table -->
+            </div>
+            <button class="pixel-btn" onclick="closeGlossary()" style="font-size: 8px; padding: 10px; width: 100%; max-width: 440px; margin-bottom: 10px;">Back</button>
+        </div>
+
+        <!-- Transition Overlay Screen -->
+        <div id="transition-screen">
+            <div id="transition-text">After 1 week...</div>
+        </div>
+    </div>
+
+    <script>
+        let playerData = {
+            gender: '',
+            name: ''
+        };
+
+        let currentDialogueIndex = 0;
+        let dialogueLines = [];
+        let currentScenarioSet = 1;
+        let currentReviewPage = 1;
+
+        function startGame() {
+            const gameStartSfx = document.getElementById('gamestart-sfx');
+            const bgMusic = document.getElementById('bg-music');
+            
+            gameStartSfx.currentTime = 0;
+            gameStartSfx.play().catch(e => console.log("SFX error:", e));
+
+            bgMusic.volume = 0.5;
+            bgMusic.play().catch(e => console.log("Audio autoplay restricted:", e));
+
+            document.getElementById('start-screen').classList.add('hidden');
+            document.getElementById('gender-screen').classList.remove('hidden');
+        }
+
+        function selectGender(gender) {
+            playerData.gender = gender;
+            document.getElementById('gender-screen').classList.add('hidden');
+            document.getElementById('name-screen').classList.remove('hidden');
+        }
+
+        function saveName() {
+            const inputVal = document.getElementById('player-name-input').value.trim();
+            if (inputVal === '') {
+                alert('Please enter a valid name!');
+                return;
+            }
+            playerData.name = inputVal;
+
+            loadDialogueSet(1);
+
+            document.getElementById('game-container').style.backgroundImage = "url('AirportBG.png')";
+
+            document.getElementById('name-screen').classList.add('hidden');
+            document.getElementById('gameplay-screen').classList.remove('hidden');
+            
+            updateDialogue();
+        }
+
+        function goBackToStart() {
+            document.getElementById('gender-screen').classList.add('hidden');
+            document.getElementById('start-screen').classList.remove('hidden');
+        }
+
+        function goBackToGender() {
+            document.getElementById('name-screen').classList.add('hidden');
+            document.getElementById('gender-screen').classList.remove('hidden');
+        }
+
+        function goBackDialogue() {
+            if (currentDialogueIndex > 0) {
+                currentDialogueIndex--;
+                updateDialogue();
+            } else {
+                if (currentScenarioSet > 1) {
+                    currentScenarioSet--;
+                    loadDialogueSet(currentScenarioSet);
+                    currentDialogueIndex = dialogueLines.length - 1;
+                    updateDialogue();
+                } else {
+                    document.getElementById('gameplay-screen').classList.add('hidden');
+                    document.getElementById('name-screen').classList.remove('hidden');
+                }
+            }
+        }
+
+        function goBackMinigame() {
+            document.getElementById('minigame-screen').classList.add('hidden');
+            document.getElementById('gameplay-screen').classList.remove('hidden');
+            currentDialogueIndex = dialogueLines.length - 1;
+            updateDialogue();
+        }
+
+        function loadDialogueSet(setNum) {
+            currentScenarioSet = setNum;
+            currentDialogueIndex = 0;
+
+            if (setNum === 1) {
+                dialogueLines = [
+                    {
+                        speaker: playerData.name,
+                        lang: 'ph',
+                        main: `Hi, ako si ${playerData.name}. Kakarating ko lang rito sa Davao galing Indonesia para bisitahin ang lola ko.`,
+                        sub: `Hi, I am ${playerData.name}. I just arrived here in Davao from Indonesia to visit my grandmother.`,
+                        id: `Hai, aku ${playerData.name}. Aku baru saja tiba di Davao dari Indonesia untuk mengunjungi nenekku.`
+                    },
+                    {
+                        speaker: "Manong Bogart",
+                        lang: 'ph',
+                        main: `Hello! Ako si Manong Bogart. Tutulungan kitang maglibot at matuto ng ilang basic Tagalog phrases habang naglalakbay ka.`,
+                        sub: `Hello there! I am Manong Bogart. I will help you get around and learn some basic Tagalog phrases as you travel.`,
+                        id: `Halo! Aku Manong Bogart. Aku akan membantumu berkeliling dan mempelajari beberapa frasa Tagalog dasar selama perjalananmu.`
+                    },
+                    {
+                        speaker: "Manong Bogart",
+                        lang: 'ph',
+                        main: `Una, alamin natin ang salitang "po". Ang "po" ay walang sariling kahulugan, pero idinaragdag natin ito sa pangungusap para magpakita ng paggalang, lalo na sa nakatatanda o may awtoridad. Karaniwan itong inilalagay pagkatapos ng unang salita o pandiwa, o kaya sa dulo ng pangungusap - hindi ito nilalagay sa mismong simula.`,
+                        sub: `First, let's learn the word "po". "Po" has no meaning of its own, but we add it to a sentence to show respect, especially to elders or people in authority. It's usually placed right after the first word or verb, or at the end of the sentence - not at the very beginning.`,
+                        id: `Pertama, mari belajar kata "po". "Po" tidak memiliki arti sendiri, tapi kita menambahkannya ke kalimat untuk menunjukkan rasa hormat, terutama kepada yang lebih tua atau berwenang. Biasanya diletakkan setelah kata atau kata kerja pertama, atau di akhir kalimat - bukan di awal kalimat.`
+                    },
+                    {
+                        speaker: "Manong Bogart",
+                        lang: 'ph',
+                        main: `Kapag sasagot ka ng "oo" nang magalang, sabihin mong "opo" - ito ay pinagsamang "oo" (yes) at "po". Kung ang sagot naman ay "hindi", sabihin mong "hindi po".`,
+                        sub: `When you answer "yes" politely, say "opo" - it's "oo" (yes) combined with "po". If the answer is "no", say "hindi po" instead.`,
+                        id: `Saat kamu menjawab "ya" dengan sopan, katakan "opo" - gabungan dari "oo" (ya) dan "po". Jika jawabannya "tidak", katakan "hindi po".`
+                    },
+                    {
+                        speaker: "Manong Bogart",
+                        lang: 'ph',
+                        main: `Gumamit din ng "Kuya" para sa kuya o trabahador, "Ate" para sa ate, "Manong" para sa mas nakatatandang lalaki, at "Manang" para sa nakatatandang babae.`,
+                        sub: `Also, use "Kuya" for older brothers or male workers, "Ate" for older sisters, "Manong" for older male guides/drivers, and "Manang" for older female vendors/aunts.`,
+                        id: `Gunakan juga "Kuya" untuk pria yang lebih tua/pekerja, "Ate" untuk kakak perempuan, "Manong" untuk pria yang lebih tua, dan "Manang" untuk wanita yang lebih tua.`
+                    },
+                    {
+                        speaker: "Manong Bogart",
+                        lang: 'ph',
+                        main: `Sunod, sa Tagalog, ang "I am [Name]" ay "Ako si [Name]".`,
+                        sub: `Next, in Tagalog, "I am [Name]" is "Ako si [Name]".`,
+                        id: `Berikutnya, dalam Tagalog, "I am [Name]" adalah "Ako si [Name]".`
+                    },
+                    {
+                        speaker: "Manong Bogart",
+                        lang: 'ph',
+                        main: `Subukan nating kausapin ang security guard gamit ang tamang titulo at tamang paglalagay ng po.`,
+                        sub: `Let's practice by talking to the security guard at the gate using proper titles and po placement.`,
+                        id: `Mari kita coba berbicara dengan petugas keamanan menggunakan gelar dan penempatan po yang tepat.`
+                    },
+                    {
+                        speaker: playerData.name,
+                        lang: 'ph',
+                        main: `Hello po, Kuya Guard! Ako po si ${playerData.name}.`,
+                        sub: `Hello po, Kuya Guard! I am ${playerData.name}.`,
+                        id: `Halo po, Kuya Guard! Ako po si ${playerData.name}.`
+                    }
+                ];
+            } else if (setNum === 2) {
+                dialogueLines = [
+                    {
+                        speaker: "Manong Bogart",
+                        lang: 'ph',
+                        main: `Magaling! Ngayon naman, alamin kung paano magtanong kung nasaan ang isang lugar gamit ang "Nasaan ang...".`,
+                        sub: `Magaling! Now let's learn how to ask where something is using "Nasaan ang...".`,
+                        id: `Bagus! Sekarang mari belajar cara menanyakan lokasi menggunakan "Nasaan ang...".`
+                    },
+                    {
+                        speaker: playerData.name,
+                        lang: 'ph',
+                        main: `Kuya Guard, nasaan po ang exit?`,
+                        sub: `Kuya Guard, where is the exit po?`,
+                        id: `Kuya Guard, di mana jalan keluar (exit) po?`
+                    },
+                    {
+                        speaker: "Kuya Guard",
+                        lang: 'ph',
+                        main: `Deretso lang po, sir/ma'am. Ingat po!`,
+                        sub: `Straight ahead, sir/ma'am. Have a safe trip / Ingat po!`,
+                        id: `Lurus saja, tuan/nyonya. Hati-hati di jalan po!`
+                    }
+                ];
+            } else if (setNum === 3) {
+                dialogueLines = [
+                    {
+                        speaker: "Manong Bogart",
+                        lang: 'ph',
+                        main: `Ngayon na nasa labas na tayo, alamin natin kung paano magtanong ng direksyon tulad ng "Paano pumunta sa..." para makasakay ng jeep.`,
+                        sub: `Now that we are outside, let's learn how to ask directions like "Paano pumunta sa..." to take a jeepney.`,
+                        id: `Sekarang kita di luar, mari belajar bertanya arah seperti "Paano pumunta sa..." untuk naik jeepney.`
+                    },
+                    {
+                        speaker: playerData.name,
+                        lang: 'ph',
+                        main: `Manong, paano po pumunta sa Maa? doon po kasi nakatira Lola ko`,
+                        sub: `Manong, how do I get to Maa po? Because my grandmother lives there po.`,
+                        id: `Manong, bagaimana cara pergi ke Maa po? Karena nenekku tinggal di sana po.`
+                    },
+                    {
+                        speaker: "Manong Bogart",
+                        lang: 'ph',
+                        main: `Sasakay tayo ng jeepney papuntang Maa. Alam mo ba kung ano ang jeepney?`,
+                        sub: `We will ride a jeepney going to Maa. Do you know what a jeepney is?`,
+                        id: `Kita akan naik jeepney menuju Maa. Apakah kamu tahu apa itu jeepney?`
+                    },
+                    {
+                        speaker: "Manong Bogart",
+                        lang: 'ph',
+                        main: `Ito ang Philippine Jeepney - o simpleng "jeep" lang ang tawag dito ng mga Pilipino. Ginawa ito mula sa mga lumang jeep ng mga sundalong Amerikano na naiwan pagkatapos ng Ikalawang Digmaang Pandaigdig, at pinahaba para makasakay ang maraming tao nang sabay-sabay.`,
+                        sub: `This is the Philippine Jeepney - or simply "jeep" as Filipinos call it. It was made from old jeeps left behind by American soldiers after World War II, and it was made longer so many people could ride together at once.`,
+                        id: `Ini adalah Philippine Jeepney - atau orang Filipina biasa menyebutnya "jeep" saja. Dibuat dari jip tua yang ditinggalkan tentara Amerika setelah Perang Dunia II, dan dibuat lebih panjang agar banyak orang bisa naik bersama-sama.`,
+                        showJeep: true
+                    },
+                    {
+                        speaker: "Manong Bogart",
+                        lang: 'ph',
+                        main: `Makukulay at magaganda ang disenyo ng bawat jeep - may mga pintura, ilaw, at palamuti, at iba-iba ang itsura ng bawat isa! Praktikal at mura rin itong sakyan, kaya naman ginagamit ito ng mga Pilipino mula pa noon hanggang ngayon.`,
+                        sub: `Each jeep is colorfully designed - with paintings, lights, and decorations, and every one looks different! It's also practical and cheap to ride, which is why Filipinos have been using it since then, all the way to today.`,
+                        id: `Setiap jeep didesain berwarna-warni - dengan lukisan, lampu, dan hiasan, dan masing-masing terlihat berbeda! Jeepney juga praktis dan murah untuk dinaiki, itulah sebabnya orang Filipina sudah menggunakannya sejak dulu hingga sekarang.`,
+                        showJeep: true
+                    },
+                    {
+                        speaker: "Manong Bogart",
+                        lang: 'ph',
+                        main: `Sumakay ka lang sa jeep na may karatula na "Maa". Dumiretso na tayo sa bahay ng lola mo ngayon!`,
+                        sub: `Just ride the jeepney with the "Maa" sign. Let's head straight to your grandmother's house now!`,
+                        id: `Naik saja jeepney dengan tanda "Maa". Mari kita langsung ke rumah nenekmu sekarang!`
+                    }
+                ];
+            } else if (setNum === 4) {
+                dialogueLines = [
+                    {
+                        speaker: playerData.name,
+                        lang: 'ph',
+                        main: `Na miss ko po kayo, lola!`,
+                        sub: `I missed you po lola!`,
+                        id: `Aku merindukanmu po nenek!`
+                    },
+                    {
+                        speaker: "Manong Bogart",
+                        lang: 'ph',
+                        main: `Bago ka pumasok, gawin muna natin ang "mano po"! Kunin mo ang kamay ng iyong lola, at idikit ito nang marahan sa iyong noo bilang tanda ng paggalang at paghingi ng basbas.`,
+                        sub: `Before you go inside, let's do "mano po" first! Take your grandmother's hand and gently press it to your forehead as a sign of respect and to ask for her blessing.`,
+                        id: `Sebelum kamu masuk, mari lakukan "mano po" dulu! Ambil tangan nenekmu, dan tempelkan dengan lembut ke dahimu sebagai tanda hormat dan meminta berkatnya.`,
+                        showMano: true
+                    },
+                    {
+                        speaker: "Manong Bogart",
+                        lang: 'ph',
+                        main: `Ang "mano" ay galing sa salitang Espanyol na "kamay", at pinagsasama natin ito ng "po" bilang paggalang. Halos pareho rin ito sa "salim" sa Indonesia at "salam" sa Malaysia - pero tandaan, sa Pilipinas, laging sa noo natin idinidikit ang kamay ng nakatatanda!`,
+                        sub: `The word "mano" comes from the Spanish word for "hand," combined with "po" as a sign of respect. It's very similar to "salim" in Indonesia and "salam" in Malaysia - but remember, in the Philippines, we always press the elder's hand to our forehead!`,
+                        id: `Kata "mano" berasal dari bahasa Spanyol yang berarti "tangan," digabung dengan "po" sebagai tanda hormat. Ini sangat mirip dengan "salim" di Indonesia dan "salam" di Malaysia - tapi ingat, di Filipina, kita selalu menempelkan tangan orang yang lebih tua ke dahi kita!`,
+                        showMano: true
+                    },
+                    {
+                        speaker: "Grandmother",
+                        lang: 'ph',
+                        main: `Hello, apo. Halika muna sa loob at magpahinga ka.`,
+                        sub: `Hello, my grandchild. Come inside first and rest.`,
+                        id: `Halo, cucu. Ayo masuk dulu dan beristirahatlah.`
+                    }
+                ];
+            } else if (setNum === 5) {
+                dialogueLines = [
+                    {
+                        speaker: "Grandmother",
+                        lang: 'ph',
+                        main: `Marami ka nang natutunang Tagalog at paggalang habang nandito ka, apo ko!`,
+                        sub: `You have learned so much Tagalog and politeness during your stay here, my grandchild!`,
+                        id: `Kamu sudah belajar banyak bahasa Tagalog dan kesopanan selama tinggal di sini, cucuku!`
+                    },
+                    {
+                        speaker: playerData.name,
+                        lang: 'ph',
+                        main: `Opo lola! Si Manong Bogart at ang iba pa ay tinulungan akong matuto nang husto.`,
+                        sub: `Opo lola! Manong Bogart and everyone else helped me learn a lot po.`,
+                        id: `Opo nenek! Manong Bogart dan yang lainnya membantuku belajar banyak.`
+                    }
+                ];
+            } else if (setNum === 6) {
+                dialogueLines = [
+                    {
+                        speaker: "Grandmother",
+                        lang: 'ph',
+                        main: `Oras na para i-impake ang mga gamit mo. Kailangan mo nang umalis ng Pilipinas pabalik ng Jakarta bukas.`,
+                        sub: `It is time for you to pack your things. You need to leave the Philippines and return to Jakarta tomorrow.`,
+                        id: `Sudah waktunya kamu mengemasi barang-barangmu. Kamu harus meninggalkan Filipina dan kembali ke Jakarta besok.`
+                    },
+                    {
+                        speaker: playerData.name,
+                        lang: 'ph',
+                        main: `Ang bilis ng panahon. Mamimiss ko po kayo at ang Davao City, lola!`,
+                        sub: `Time flies so fast. I will miss you and Davao city, lola!`,
+                        id: `Waktu berlalu begitu cepat. Aku akan merindukanmu dan Davao City, nenek!`
+                    }
+                ];
+            } else if (setNum === 7) {
+                dialogueLines = [
+                    {
+                        speaker: "Grandmother",
+                        lang: 'ph',
+                        main: `Mag-ingat ka sa pag-uwi, ${playerData.name}. Palagi mong tandaan ang mga natutunan mo rito!`,
+                        sub: `Safe travels back home, ${playerData.name}. Always remember what you learned here!`,
+                        id: `Selamat jalan kembali ke rumah, ${playerData.name}. Selalu ingat apa yang kamu pelajari di sini!`
+                    },
+                    {
+                        speaker: playerData.name,
+                        lang: 'ph',
+                        main: `Paalam po, lola! Babalik po ulit ako sa susunod!`,
+                        sub: `Goodbye po lola! I will come back again next time!`,
+                        id: `Selamat tinggal po nenek! Aku akan kembali lagi lain waktu!`
+                    }
+                ];
+            } else if (setNum === 8) {
+                dialogueLines = [
+                    {
+                        speaker: "Manong Bogart",
+                        lang: 'ph',
+                        main: `Maligayang pagbalik sa Davao International Airport! Tingnan natin ang flight details mo bago ka sumakay.`,
+                        sub: `Welcome back to the Davao International Airport! Let's check your flight details before you board.`,
+                        id: `Selamat datang kembali di Davao International Airport! Mari periksa detail penerbanganmu.`
+                    },
+                    {
+                        speaker: playerData.name,
+                        lang: 'ph',
+                        main: `Manong Bogart, saan po ang boarding gate ko?`,
+                        sub: `Manong Bogart, where is my boarding gate po?`,
+                        id: `Manong Bogart, di mana gerbang boarding-ku po?`
+                    },
+                    {
+                        speaker: "Manong Bogart",
+                        lang: 'ph',
+                        main: `Deretso lang ang gate mo. Ligtas na pag-uwi pabalik ng Jakarta!`,
+                        sub: `Your gate is straight ahead. Have a safe flight back to Jakarta!`,
+                        id: `Gerbangmu lurus ke depan. Selamat penerbangan kembali ke Jakarta!`
+                    }
+                ];
+            } else if (setNum === 9) {
+                dialogueLines = [
+                    {
+                        speaker: "Manong Bogart",
+                        lang: 'ph',
+                        main: `Maligayang pagbabalik sa Jakarta, Indonesia! Sana ay natutunan mo ang lahat ng mga salitang Filipino na iyong natutunan sa biyaheng ito, para sa susunod mong pagbisita doon.`,
+                        sub: `Welcome back to Jakarta, Indonesia! I hope you learned all the Filipino words you picked up on this trip for the next visit you'll be doing there.`,
+                        id: `Selamat datang kembali di Jakarta, Indonesia! Semoga kamu mempelajari semua kata-kata Filipina yang kamu pelajari dalam perjalanan ini, untuk kunjunganmu berikutnya ke sana.`
+                    }
+                ];
+            }
+        }
+
+        function playTalkingSfx() {
+            const talkSfx = document.getElementById('talking-sfx');
+            talkSfx.currentTime = 0;
+            talkSfx.play().catch(e => console.log("Talking SFX error:", e));
+
+            setTimeout(() => {
+                if (!talkSfx.paused) {
+                    talkSfx.pause();
+                }
+            }, 1500);
+        }
+
+        function playShortenedSfx(audioId) {
+            const sfx = document.getElementById(audioId);
+            sfx.currentTime = 0;
+            sfx.play().catch(e => console.log("SFX error:", e));
+        }
+
+        function updateDialogue() {
+            const currentLine = dialogueLines[currentDialogueIndex];
+            document.getElementById('speaker-name').innerText = currentLine.speaker;
+
+            // Make orange text the active language depending on what's being spoken
+            const mainEl = document.getElementById('dialogue-main');
+            const subEl = document.getElementById('dialogue-sub');
+            
+            if (currentLine.lang === 'ph') {
+                mainEl.innerText = currentLine.main; // Orange Tagalog text
+                mainEl.style.color = '#f39c12';
+                subEl.innerText = currentLine.sub;   // White English translation
+                subEl.style.color = '#fff';
+            } else {
+                mainEl.innerText = currentLine.sub;   // Orange English text
+                mainEl.style.color = '#f39c12';
+                subEl.innerText = currentLine.main;   // White Tagalog text
+                subEl.style.color = '#fff';
+            }
+
+            document.getElementById('dialogue-id').innerText = currentLine.id;
+
+            const jeepOverlay = document.getElementById('jeep-overlay-img');
+            if (currentLine.showJeep) {
+                jeepOverlay.classList.remove('hidden');
+            } else {
+                jeepOverlay.classList.add('hidden');
+            }
+
+            const singleSprite = document.getElementById('single-char-container');
+            const twoCharContainer = document.getElementById('two-char-container');
+            const leftPlayerSprite = document.getElementById('left-player-sprite');
+            const rightNpcSprite = document.getElementById('right-npc-sprite');
+            const gameplayScreen = document.getElementById('gameplay-screen');
+
+            // Background handling per scene
+            if (currentLine.showMano) {
+                document.getElementById('game-container').style.backgroundImage = playerData.gender === 'boy' ? "url('boy mano.jpg')" : "url('girl mano.jpg')";
+            } else if (currentScenarioSet === 4 || currentScenarioSet === 5 || currentScenarioSet === 6 || currentScenarioSet === 7) {
+                document.getElementById('game-container').style.backgroundImage = "url('Home Background.jpg')";
+            } else if (currentScenarioSet === 1 || currentScenarioSet === 2 || currentScenarioSet === 8) {
+                document.getElementById('game-container').style.backgroundImage = "url('AirportBG.png')";
+            } else if (currentScenarioSet === 3 || currentScenarioSet === 9) {
+                document.getElementById('game-container').style.backgroundImage = "url('outside.jpg')";
+            }
+
+            const isGuardEncounter = (currentScenarioSet === 1 && currentDialogueIndex >= 6) || 
+                                     (currentScenarioSet === 2 && currentDialogueIndex >= 1);
+
+            const isGrandmaEncounter = (currentScenarioSet === 4 || currentScenarioSet === 5 || currentScenarioSet === 6 || currentScenarioSet === 7);
+
+            const frameSequence = (currentDialogueIndex % 3) + 1;
+
+            // Keep the dialogue box up near the back button whenever two characters
+            // are sharing the scene, so it never covers their faces.
+            if (isGuardEncounter || isGrandmaEncounter) {
+                gameplayScreen.classList.add('text-top');
+            } else {
+                gameplayScreen.classList.remove('text-top');
+            }
+
+            if (currentLine.showMano) {
+                // Mano scene: no characters on screen at all - just the mano background photo
+                // and the dialogue box explaining the gesture.
+                twoCharContainer.classList.add('hidden');
+                singleSprite.classList.add('hidden');
+                singleSprite.classList.remove('mano-guide-sprite');
+            } else if (isGuardEncounter) {
+                singleSprite.classList.add('hidden');
+                singleSprite.classList.remove('mano-guide-sprite');
+                twoCharContainer.classList.remove('hidden');
+                rightNpcSprite.classList.remove('grandma-npc');
+
+                if (currentLine.speaker === playerData.name) {
+                    leftPlayerSprite.classList.remove('idle-npc-sprite');
+                    if (playerData.gender === 'boy') {
+                        leftPlayerSprite.style.backgroundImage = `url('boytalking${frameSequence}.png')`;
+                    } else {
+                        leftPlayerSprite.style.backgroundImage = `url('girltalking${frameSequence}.png')`;
+                    }
+                } else {
+                    leftPlayerSprite.classList.add('idle-npc-sprite');
+                    if (playerData.gender === 'boy') {
+                        leftPlayerSprite.style.backgroundImage = `url('Boy Character.png')`;
+                    } else {
+                        leftPlayerSprite.style.backgroundImage = `url('Girl character.png')`;
+                    }
+                }
+
+                rightNpcSprite.style.backgroundImage = `url('secuidle.png')`;
+            } else if (isGrandmaEncounter) {
+                singleSprite.classList.add('hidden');
+                singleSprite.classList.remove('mano-guide-sprite');
+                twoCharContainer.classList.remove('hidden');
+                
+                if (currentLine.speaker === playerData.name) {
+                    leftPlayerSprite.classList.remove('idle-npc-sprite');
+                    if (playerData.gender === 'boy') {
+                        leftPlayerSprite.style.backgroundImage = `url('boytalking${frameSequence}.png')`;
+                    } else {
+                        leftPlayerSprite.style.backgroundImage = `url('girltalking${frameSequence}.png')`;
+                    }
+                } else {
+                    leftPlayerSprite.classList.add('idle-npc-sprite');
+                    if (playerData.gender === 'boy') {
+                        leftPlayerSprite.style.backgroundImage = `url('Boy Character.png')`;
+                    } else {
+                        leftPlayerSprite.style.backgroundImage = `url('Girl character.png')`;
+                    }
+                }
+                rightNpcSprite.classList.add('grandma-npc');
+                rightNpcSprite.style.backgroundImage = `url('grandma.gif')`;
+            } else {
+                twoCharContainer.classList.add('hidden');
+                singleSprite.classList.remove('hidden');
+                singleSprite.classList.remove('mano-guide-sprite');
+
+                if (currentLine.speaker === playerData.name) {
+                    if (playerData.gender === 'boy') {
+                        singleSprite.style.backgroundImage = `url('boytalking${frameSequence}.png')`;
+                    } else {
+                        singleSprite.style.backgroundImage = `url('girltalking${frameSequence}.png')`;
+                    }
+                } else {
+                    singleSprite.style.backgroundImage = `url('localguide.png')`;
+                }
+            }
+
+            playTalkingSfx();
+        }
+
+        function advanceDialogue() {
+            currentDialogueIndex++;
+            if (currentDialogueIndex < dialogueLines.length) {
+                updateDialogue();
+            } else {
+                const talkSfx = document.getElementById('talking-sfx');
+                talkSfx.pause();
+                
+                if (currentScenarioSet === 4) {
+                    triggerBlackoutTransition("After 1 week...", () => {
+                        currentScenarioSet = 5;
+                        loadDialogueSet(currentScenarioSet);
+                        document.getElementById('gameplay-screen').classList.remove('hidden');
+                        updateDialogue();
+                    });
+                } else if (currentScenarioSet === 7) {
+                    triggerBlackoutTransition("Heading back to the Airport...", () => {
+                        currentScenarioSet = 8;
+                        loadDialogueSet(currentScenarioSet);
+                        document.getElementById('gameplay-screen').classList.remove('hidden');
+                        updateDialogue();
+                    });
+                } else if (currentScenarioSet === 8) {
+                    triggerBlackoutTransition("Ilang oras na paglipad, dumarating ka na sa Jakarta, Indonesia...", () => {
+                        currentScenarioSet = 9;
+                        loadDialogueSet(currentScenarioSet);
+                        document.getElementById('gameplay-screen').classList.remove('hidden');
+                        updateDialogue();
+                    });
+                } else if (currentScenarioSet < 9) {
+                    document.getElementById('gameplay-screen').classList.add('hidden');
+                    document.getElementById('minigame-screen').classList.remove('hidden');
+                    setupMinigame();
+                } else {
+                    document.getElementById('gameplay-screen').classList.add('hidden');
+                    document.getElementById('game-container').style.backgroundImage = "url('outside.jpg')";
+                    currentReviewPage = 1;
+                    renderReviewPage();
+                    document.getElementById('review-screen').classList.remove('hidden');
+                }
+            }
+        }
+
+        function triggerBlackoutTransition(text, callback) {
+            const gameplayScreen = document.getElementById('gameplay-screen');
+            const transitionScreen = document.getElementById('transition-screen');
+            const transitionText = document.getElementById('transition-text');
+
+            gameplayScreen.classList.add('hidden');
+            transitionText.innerText = text;
+            transitionScreen.style.opacity = '1';
+
+            setTimeout(() => {
+                transitionScreen.style.opacity = '0';
+                setTimeout(() => {
+                    callback();
+                }, 1000);
+            }, 2000);
+        }
+
+        function setupMinigame() {
+            const titleEl = document.getElementById('mg-title');
+            const containerEl = document.getElementById('mg-sentence-area');
+            const optionsEl = document.getElementById('mg-options-area');
+
+            document.getElementById('mg-feedback').innerText = '';
+
+            if (currentScenarioSet === 1) {
+                titleEl.innerText = "Tagalog Challenge: Politeness";
+                containerEl.innerHTML = `Complete your introduction with respect:<br><br><div class="drop-zone" id="dropzone">[ ? ]</div>, Kuya Guard! Ako po si <span id="mg-player-name">${playerData.name}</span>.`;
+                optionsEl.innerHTML = `
+                    <div class="drag-item" onclick="checkMinigameAnswer('opt-po')" id="opt-po">Hello po</div>
+                    <div class="drag-item" onclick="checkMinigameAnswer('opt-salamat')" id="opt-salamat">Salamat</div>
+                `;
+            } else if (currentScenarioSet === 2) {
+                titleEl.innerText = "Tagalog Challenge: Asking Location";
+                containerEl.innerHTML = `Complete the question for "Where is the exit?":<br><br>Kuya Guard, <div class="drop-zone" id="dropzone">[ ? ]</div> po ang exit?`;
+                optionsEl.innerHTML = `
+                    <div class="drag-item" onclick="checkMinigameAnswer('opt-nasaan')" id="opt-nasaan">nasaan</div>
+                    <div class="drag-item" onclick="checkMinigameAnswer('opt-paano')" id="opt-paano">paano</div>
+                `;
+            } else if (currentScenarioSet === 3) {
+                titleEl.innerText = "Tagalog Challenge: Directions";
+                containerEl.innerHTML = `Complete asking for directions:<br><br>Manong, <div class="drop-zone" id="dropzone">[ ? ]</div> pumunta sa Maa?`;
+                optionsEl.innerHTML = `
+                    <div class="drag-item" onclick="checkMinigameAnswer('opt-paano')" id="opt-paano">paano po</div>
+                    <div class="drag-item" onclick="checkMinigameAnswer('opt-nasaan')" id="opt-nasaan">nasaan</div>
+                `;
+            } else if (currentScenarioSet === 4) {
+                titleEl.innerText = "Tagalog Challenge: Greeting Grandma";
+                containerEl.innerHTML = `Complete saying "I missed you":<br><br>I will miss you <div class="drop-zone" id="dropzone">[ ? ]</div> lola!`;
+                optionsEl.innerHTML = `
+                    <div class="drag-item" onclick="checkMinigameAnswer('opt-po')" id="opt-po">po</div>
+                    <div class="drag-item" onclick="checkMinigameAnswer('opt-mahal')" id="opt-mahal">mahal</div>
+                `;
+            } else if (currentScenarioSet === 5) {
+                titleEl.innerText = "Tagalog Challenge: Expressing Gratitude";
+                containerEl.innerHTML = `Complete saying "Many learnings":<br><br><div class="drop-zone" id="dropzone">[ ? ]</div> lola! Manong Bogart helped me.`;
+                optionsEl.innerHTML = `
+                    <div class="drag-item" onclick="checkMinigameAnswer('opt-opolola')" id="opt-opolola">Opo</div>
+                    <div class="drag-item" onclick="checkMinigameAnswer('opt-hindi')" id="opt-hindi">Hindi</div>
+                `;
+            } else if (currentScenarioSet === 6) {
+                titleEl.innerText = "Tagalog Challenge: Departure Notice";
+                containerEl.innerHTML = `Complete saying goodbye with honorifics:<br><br>I will miss you, <div class="drop-zone" id="dropzone">[ ? ]</div>!`;
+                optionsEl.innerHTML = `
+                    <div class="drag-item" onclick="checkMinigameAnswer('opt-pololafinal')" id="opt-pololafinal">lola</div>
+                    <div class="drag-item" onclick="checkMinigameAnswer('opt-tropa')" id="opt-tropa">tropa</div>
+                `;
+            } else if (currentScenarioSet === 7) {
+                titleEl.innerText = "Tagalog Challenge: Saying Goodbye";
+                containerEl.innerHTML = `Complete saying goodbye to grandma:<br><br><div class="drop-zone" id="dropzone">[ ? ]</div> lola! Babalik po ulit ako!`;
+                optionsEl.innerHTML = `
+                    <div class="drag-item" onclick="checkMinigameAnswer('opt-paalam')" id="opt-paalam">Paalam po</div>
+                    <div class="drag-item" onclick="checkMinigameAnswer('opt-kumusta')" id="opt-kumusta">Kumusta</div>
+                `;
+            } else if (currentScenarioSet === 8) {
+                titleEl.innerText = "Tagalog Challenge: Airport Boarding";
+                containerEl.innerHTML = `Complete asking the guide: <br><br><div class="drop-zone" id="dropzone">[ ? ]</div> Manong Bogart, saan po ang gate ko?`;
+                optionsEl.innerHTML = `
+                    <div class="drag-item" onclick="checkMinigameAnswer('opt-manongname')" id="opt-manongname">Manong Bogart</div>
+                    <div class="drag-item" onclick="checkMinigameAnswer('opt-pomanong')" id="opt-pomanong">Po Manong Bogart</div>
+                `;
+            }
+        }
+
+        function checkMinigameAnswer(selectedId) {
+            let isCorrect = false;
+            if (currentScenarioSet === 1 && selectedId === "opt-po") isCorrect = true;
+            if (currentScenarioSet === 2 && selectedId === "opt-nasaan") isCorrect = true;
+            if (currentScenarioSet === 3 && selectedId === "opt-paano") isCorrect = true;
+            if (currentScenarioSet === 4 && selectedId === "opt-po") isCorrect = true;
+            if (currentScenarioSet === 5 && selectedId === "opt-opolola") isCorrect = true;
+            if (currentScenarioSet === 6 && selectedId === "opt-pololafinal") isCorrect = true;
+            if (currentScenarioSet === 7 && selectedId === "opt-paalam") isCorrect = true;
+            if (currentScenarioSet === 8 && selectedId === "opt-manongname") isCorrect = true;
+
+            const optionsEl = document.getElementById('mg-options-area');
+            const allOptions = optionsEl.querySelectorAll('.drag-item');
+            allOptions.forEach(opt => opt.classList.add('item-disabled'));
+
+            const dropzone = document.getElementById('dropzone');
+            const sentenceContainer = document.getElementById('mg-sentence-area');
+            const feedbackEl = document.getElementById('mg-feedback');
+            const selectedEl = document.getElementById(selectedId);
+            const selectedWord = selectedEl ? selectedEl.innerText : '';
+
+            if (isCorrect) {
+                playShortenedSfx('correct-sfx');
+
+                // The word floats into the blank...
+                dropzone.innerText = selectedWord;
+                dropzone.classList.add('filled');
+
+                // ...and the whole sentence blinks green.
+                sentenceContainer.classList.add('flash-correct');
+
+                feedbackEl.style.color = '#2ecc71';
+                feedbackEl.innerText = 'Tama! Correct! ✅';
+
+                setTimeout(() => {
+                    sentenceContainer.classList.remove('flash-correct');
+                    document.getElementById('minigame-screen').classList.add('hidden');
+
+                    currentScenarioSet++;
+                    if (currentScenarioSet <= 9) {
+                        loadDialogueSet(currentScenarioSet);
+                        document.getElementById('gameplay-screen').classList.remove('hidden');
+                        updateDialogue();
+                    } else {
+                        document.getElementById('game-container').style.backgroundImage = "url('outside.jpg')";
+                        currentReviewPage = 1;
+                        renderReviewPage();
+                        document.getElementById('review-screen').classList.remove('hidden');
+                    }
+                }, 1400);
+            } else {
+                playShortenedSfx('wrong-sfx');
+                if (selectedEl) selectedEl.classList.add('wrong-choice');
+                feedbackEl.style.color = '#e74c3c';
+                feedbackEl.innerText = 'Hindi tama. Subukan ulit! (Not quite. Try again!)';
+
+                setTimeout(() => {
+                    allOptions.forEach(opt => opt.classList.remove('item-disabled', 'wrong-choice'));
+                    feedbackEl.innerText = '';
+                }, 1200);
+            }
+        }
+
+        const TOTAL_REVIEW_PAGES = 6;
+
+        function changeReviewPage(direction) {
+            currentReviewPage += direction;
+            if (currentReviewPage < 1) currentReviewPage = 1;
+            if (currentReviewPage > TOTAL_REVIEW_PAGES) currentReviewPage = TOTAL_REVIEW_PAGES;
+            renderReviewPage();
+        }
+
+        const reviewPages = [
+            {
+                title: "Ang Salitang 'Po' (The Word 'Po')",
+                items: [
+                    {
+                        heading: "What is 'po'? 🙇",
+                        desc: `Think of "po" like a tiny, invisible bow you add when you talk! It doesn't mean anything by itself - it's not "please" or "yes" or any object. It's just a polite little word Filipinos add when talking to someone older, like a grandma, a teacher, or a guard.`
+                    },
+                    {
+                        heading: "Where do we put it?",
+                        desc: `"Po" almost never goes at the very start of a sentence. It usually goes right after the first word or action word, or at the very end.<br><b>Example:</b> "Salamat po!" (Thank you po!) - see how "po" comes right after "salamat"?<br><b>Another example:</b> "Kuya Guard, nasaan po ang exit?" - "po" slides in the middle, not at the front.`
+                    },
+                    {
+                        heading: "Why does it matter?",
+                        desc: `Adding "po" is like adding a warm, respectful tone to your voice. Even if you make a small mistake in where you put it, people will still understand you and appreciate that you tried to be polite!`
+                    }
+                ]
+            },
+            {
+                title: "Ang 'Opo' at 'Hindi Po' (Polite Yes and No)",
+                items: [
+                    {
+                        heading: "Saying 'yes' politely ✅",
+                        desc: `When someone older asks you something and the answer is "yes," don't just say "oo." Say "opo" instead! "Opo" is really just "oo" (yes) + "po" squished into one friendly word.`
+                    },
+                    {
+                        heading: "Saying 'no' politely",
+                        desc: `If the answer is "no," say "hindi po" instead of just "hindi." Adding "po" keeps it gentle and respectful, even when you're disagreeing or saying no.`
+                    },
+                    {
+                        heading: "Try it!",
+                        desc: `<b>Question:</b> "Kumain ka na ba?" (Have you eaten?)<br><b>Polite answer:</b> "Opo, kumain na po ako." (Yes, I have already eaten.)<br>Using "opo" makes grown-ups smile - it shows really good manners!`
+                    }
+                ]
+            },
+            {
+                title: "Mga Espesyal na Titulo (Special Titles for People)",
+                items: [
+                    {
+                        heading: "We don't just say a name - we add a title! 💛",
+                        desc: `In the Philippines, we add a friendly title before someone's name to show we respect them, kind of like a warm nickname.`
+                    },
+                    {
+                        heading: "Kuya & Ate",
+                        desc: `<b>Kuya</b> - for an older brother, or any young man a bit older than you (like a guard or a helper).<br><b>Ate</b> - for an older sister, or any young woman a bit older than you.`
+                    },
+                    {
+                        heading: "Manong & Manang",
+                        desc: `<b>Manong</b> - for an older man, like a friendly driver or tour guide.<br><b>Manang</b> - for an older woman, like a kind market vendor or auntie.`
+                    },
+                    {
+                        heading: "Lola & Lolo",
+                        desc: `<b>Lola</b> - grandmother. <b>Lolo</b> - grandfather. These are some of the warmest, most respectful words in Tagalog!`
+                    }
+                ]
+            },
+            {
+                title: "Pagpapakilala at Pagtatanong (Introducing Yourself & Asking)",
+                items: [
+                    {
+                        heading: "Telling someone your name",
+                        desc: `To say "I am [Name]," say: <b>"Ako si [Name]."</b> That's it! Add "po" to make it extra polite: "Ako po si {{name}}."`
+                    },
+                    {
+                        heading: "Asking WHERE something is",
+                        desc: `Use <b>"Nasaan ang...?"</b> which means "Where is...?"<br><b>Example:</b> "Nasaan po ang exit?" (Where is the exit, po?)`
+                    },
+                    {
+                        heading: "Asking HOW to get somewhere",
+                        desc: `Use <b>"Paano pumunta sa...?"</b> which means "How do I go to...?"<br><b>Example:</b> "Paano po pumunta sa Maa?" (How do I get to Maa, po?)`
+                    }
+                ]
+            },
+            {
+                title: "Ano ang Jeepney? (What is a Jeepney?)",
+                items: [
+                    {
+                        heading: "A car that carries a lot of friends! 🚙",
+                        desc: `A jeepney is a long, colorful vehicle that many people ride together at the same time, like a small, fun bus. It is one of the most famous things in the Philippines!`
+                    },
+                    {
+                        heading: "Where did it come from?",
+                        desc: `A long time ago, after a big war, soldiers left behind their old jeeps. Instead of throwing them away, clever Filipinos made the jeeps longer and added roofs and seats so many people could ride inside together. That's how the jeepney was born!`
+                    },
+                    {
+                        heading: "Why is it special?",
+                        desc: `Every jeepney looks different! They are painted with bright colors, pictures, and lights. The ride is also very cheap, so almost everyone uses jeepneys to go to school, work, or to visit family - just like our character did to visit Lola!`
+                    }
+                ]
+            },
+            {
+                title: "Pagpapahayag ng Damdamin at Pagpapaalam (Feelings & Goodbyes)",
+                items: [
+                    {
+                        heading: "Saying you'll miss someone 💕",
+                        desc: `To say "I will miss you," say <b>"Mami-miss kita"</b>. If the person is older, add "po": <b>"Mami-miss ko po kayo!"</b>`
+                    },
+                    {
+                        heading: "Saying goodbye politely",
+                        desc: `When it's time to leave, say <b>"Paalam po!"</b> - that's "Goodbye" the respectful way.`
+                    },
+                    {
+                        heading: "Great job learning Tagalog!",
+                        desc: `You now know how to greet people, ask for directions, use titles, and say goodbye - all while showing respect with "po" and "opo"! Now let's play a game to practice everything you learned.`
+                    }
+                ]
+            }
+        ];
+
+        function renderReviewPage() {
+            const titleEl = document.getElementById('review-header-title');
+            const contentEl = document.getElementById('review-card-content');
+            const prevBtn = document.getElementById('prev-page-btn');
+            const nextBtn = document.getElementById('next-page-btn');
+
+            const pageData = reviewPages[currentReviewPage - 1];
+            titleEl.innerText = `${pageData.title} (${currentReviewPage}/${TOTAL_REVIEW_PAGES})`;
+
+            prevBtn.style.display = currentReviewPage === 1 ? 'none' : 'block';
+            nextBtn.style.display = currentReviewPage === TOTAL_REVIEW_PAGES ? 'none' : 'block';
+
+            let itemsHtml = pageData.items.map((item, idx) => `
+                <div class="review-item">
+                    <div class="review-title">${idx + 1}. ${item.heading}</div>
+                    <div class="review-desc">${item.desc.replace('{{name}}', playerData.name || 'Kaibigan')}</div>
+                </div>
+            `).join('');
+
+            if (currentReviewPage === TOTAL_REVIEW_PAGES) {
+                itemsHtml += `
+                    <button class="pixel-btn" onclick="startQuiz()" style="margin-top: 10px; width: 100%;">🎮 Play the Word Game!</button>
+                    <button class="pixel-btn" onclick="openGlossary()" style="margin-top: 10px; width: 100%; background-color: #2ecc71; color: #000;">📖 Word Bank (PH-EN-ID)</button>
+                    <button class="pixel-btn" onclick="location.reload()" style="margin-top: 10px; width: 100%; background-color: #555;">Play Story Again</button>
+                `;
+            }
+
+            contentEl.innerHTML = itemsHtml;
+        }
+
+        let quizIndex = 0;
+        let quizScore = 0;
+
+        function getQuizQuestions() {
+            const name = playerData.name || 'Kaibigan';
+            return [
+                {
+                    text: `Fill in the blank to say "Thank you" politely:<br><br>"Salamat ${'___'}!"`,
+                    hint: `Tip: it's the tiny word of respect you add to almost every polite sentence.`,
+                    answer: ['po'],
+                    choices: ['po', 'opo', 'ate']
+                },
+                {
+                    text: `Fill in the blank. This is the POLITE way to say "yes":<br><br>"${'___'}, kumain na po ako."`,
+                    hint: `Tip: it's "oo" (yes) combined with "po".`,
+                    answer: ['opo'],
+                    choices: ['hindi', 'opo', 'paano']
+                },
+                {
+                    text: `Fill in the blank. This is the POLITE way to say "no":<br><br>"${'___'} po." (meaning: "No po.")`,
+                    hint: `Tip: just add "po" after this word to say no politely.`,
+                    answer: ['hindi'],
+                    choices: ['hindi', 'ako', 'lola']
+                },
+                {
+                    text: `Fill in the blank. This title is for an older brother, or a helpful guard:<br><br>"Hello po, ${'___'} Guard!"`,
+                    hint: `Tip: think about the title you'd use for an older male sibling.`,
+                    answer: ['kuya', 'ate'],
+                    choices: ['kuya', 'ate', 'manong'],
+                    followUp: `Good job! Remember: the title depends on the guard's gender too - use "Kuya" for a male guard, and "Ate" for a female guard.`
+                },
+                {
+                    text: `Fill in the blank. This title is for an older sister:<br><br>"Salamat po, ${'___'}!"`,
+                    hint: `Tip: it's the counterpart to "Kuya", but for girls.`,
+                    answer: ['ate'],
+                    choices: ['manang', 'ate', 'lola']
+                },
+                {
+                    text: `Fill in the blank. This word means "grandmother":<br><br>"Mami-miss ko po kayo, ${'___'}!"`,
+                    hint: `Tip: it's what our character calls their grandmother the whole game!`,
+                    answer: ['lola'],
+                    choices: ['lola', 'kuya', 'ate']
+                },
+                {
+                    text: `Fill in the blank to introduce yourself as "${name}":<br><br>"${'___'} si ${name}."`,
+                    hint: `Tip: "___ si [Name]" means "I am [Name]".`,
+                    answer: ['ako'],
+                    choices: ['ako', 'opo', 'paalam']
+                },
+                {
+                    text: `Fill in the blank to ask "Where is the exit?":<br><br>"${'___'} po ang exit?"`,
+                    hint: `Tip: this word means "where".`,
+                    answer: ['nasaan'],
+                    choices: ['nasaan', 'paano', 'paalam']
+                },
+                {
+                    text: `Fill in the blank to ask "How do I get to Maa?":<br><br>"${'___'} po pumunta sa Maa?"`,
+                    hint: `Tip: this word means "how".`,
+                    answer: ['paano'],
+                    choices: ['paano', 'nasaan', 'opo']
+                },
+                {
+                    text: `Fill in the blank. This colorful public vehicle in the Philippines was made from old military vehicles:<br><br>"Sasakay tayo ng ${'___'} papuntang Maa."`,
+                    hint: `Tip: Manong Bogart taught you its full name AND the short name Filipinos use.`,
+                    answer: ['jeepney', 'jeep'],
+                    choices: ['jeepney', 'jeep', 'kalesa']
+                },
+                {
+                    text: `Fill in the blank. This is done by pressing an elder's hand to your forehead to ask for a blessing:<br><br>"${'___'}, lola!"`,
+                    hint: `Tip: Manong Bogart just taught you this two-word gesture of respect.`,
+                    answer: ['mano po'],
+                    choices: ['mano po', 'beso', 'yakap']
+                },
+                {
+                    text: `Fill in the blank to say "Goodbye" politely to lola:<br><br>"${'___'}, lola! Babalik po ulit ako!"`,
+                    hint: `Tip: two words - "Goodbye" plus the respect word.`,
+                    answer: ['paalam po'],
+                    choices: ['paalam po', 'kumusta', 'salamat po']
+                },
+                {
+                    text: `Fill in the blank. The guard said this word to wish you a safe trip:<br><br>"Deretso lang po, sir/ma'am. ${'___'} po!"`,
+                    hint: `Tip: it means "take care" or "be careful".`,
+                    answer: ['ingat'],
+                    choices: ['ingat', 'salamat', 'paalam']
+                },
+                {
+                    text: `Fill in the blank. This word means "straight ahead":<br><br>"${'___'} lang po, sir/ma'am."`,
+                    hint: `Tip: the guard used this word to give directions.`,
+                    answer: ['deretso'],
+                    choices: ['deretso', 'nasaan', 'paano']
+                },
+                {
+                    text: `Fill in the blank. This title is for an older woman, like a kind vendor or auntie:`,
+                    hint: `Tip: it's the female counterpart to "Manong".`,
+                    answer: ['manang'],
+                    choices: ['manang', 'ate', 'lola']
+                },
+                {
+                    text: `Fill in the blank. This word means "grandfather":`,
+                    hint: `Tip: it's the male counterpart to "Lola".`,
+                    answer: ['lolo'],
+                    choices: ['lolo', 'kuya', 'manong']
+                },
+                {
+                    text: `Fill in the blank. Manong Bogart said "mano po" is similar to "${'___'}" in Indonesia:`,
+                    hint: `Tip: Manong Bogart compared "mano po" to a custom in two neighboring countries.`,
+                    answer: ['salim'],
+                    choices: ['salim', 'salam', 'opo']
+                },
+                {
+                    text: `Fill in the blank. Manong Bogart said "mano po" is similar to "${'___'}" in Malaysia:`,
+                    hint: `Tip: this one sounds a lot like the Indonesian version, but it's used in Malaysia.`,
+                    answer: ['salam'],
+                    choices: ['salam', 'salim', 'paano']
+                },
+                {
+                    text: `Fill in the blank to say "I will miss you" to a friend:<br><br>"${'___'} kita!"`,
+                    hint: `Tip: this is the casual, no-"po" version - used with someone your own age.`,
+                    answer: ['mami-miss'],
+                    choices: ['mami-miss', 'paalam', 'salamat']
+                },
+                {
+                    text: `Fill in the blank. When doing "mano po", we always press the elder's hand to our ${'___'}:`,
+                    hint: `Tip: it's a part of your face, right above your eyebrows.`,
+                    answer: ['noo'],
+                    choices: ['noo', 'kamay', 'balikat']
+                }
+            ];
+        }
+
+        function startQuiz() {
+            document.getElementById('review-screen').classList.add('hidden');
+            document.getElementById('quiz-results-screen').classList.add('hidden');
+            quizIndex = 0;
+            quizScore = 0;
+            document.getElementById('quiz-screen').classList.remove('hidden');
+            renderQuizQuestion();
+        }
+
+        function renderQuizQuestion() {
+            const questions = getQuizQuestions();
+            const q = questions[quizIndex];
+            document.getElementById('quiz-progress').innerText = `Question ${quizIndex + 1} of ${questions.length}`;
+            document.getElementById('quiz-question-text').innerHTML = `${q.text}<br><br><span style="color:#aaa;">${q.hint}</span>`;
+            document.getElementById('quiz-feedback').innerText = '';
+
+            const choicesArea = document.getElementById('quiz-choices-area');
+            choicesArea.innerHTML = q.choices.map((label, idx) => `
+                <button class="quiz-choice-btn" id="quiz-choice-${idx}" onclick="checkQuizAnswer('${label.replace(/'/g, "\\'")}', ${idx})">
+                    ${label}
+                </button>
+            `).join('');
+        }
+
+        function checkQuizAnswer(selectedLabel, choiceIdx) {
+            const questions = getQuizQuestions();
+            const q = questions[quizIndex];
+            const feedbackEl = document.getElementById('quiz-feedback');
+            const allButtons = document.querySelectorAll('.quiz-choice-btn');
+            allButtons.forEach(btn => btn.disabled = true);
+
+            const selectedBtn = document.getElementById(`quiz-choice-${choiceIdx}`);
+            const acceptedAnswers = q.answer.map(a => a.toLowerCase());
+            const isCorrect = acceptedAnswers.includes(selectedLabel.toLowerCase());
+
+            if (isCorrect) {
+                playShortenedSfx('correct-sfx');
+                quizScore++;
+                feedbackEl.style.color = '#2ecc71';
+                feedbackEl.innerHTML = 'Tama! Correct! ✅' + (q.followUp ? `<br><span style="color:#f39c12;">${q.followUp}</span>` : '');
+                selectedBtn.classList.add('correct-choice');
+            } else {
+                playShortenedSfx('wrong-sfx');
+                feedbackEl.style.color = '#e74c3c';
+                feedbackEl.innerHTML = `Hindi tama. The correct answer is "${q.answer[0]}".` + (q.followUp ? `<br><span style="color:#f39c12;">${q.followUp}</span>` : '');
+                selectedBtn.classList.add('wrong-choice');
+                allButtons.forEach((btn, idx) => {
+                    if (q.choices[idx] && acceptedAnswers.includes(q.choices[idx].toLowerCase())) {
+                        btn.classList.add('correct-choice');
+                    }
+                });
+            }
+
+            setTimeout(() => {
+                quizIndex++;
+                if (quizIndex < questions.length) {
+                    renderQuizQuestion();
+                } else {
+                    showQuizResults();
+                }
+            }, 2200);
+        }
+
+        function showQuizResults() {
+            const questions = getQuizQuestions();
+            document.getElementById('quiz-screen').classList.add('hidden');
+            document.getElementById('quiz-results-screen').classList.remove('hidden');
+
+            let message = '';
+            if (quizScore === questions.length) {
+                message = 'Perpekto! You got everything right! 🌟';
+            } else if (quizScore >= questions.length * 0.7) {
+                message = 'Magaling! Great job! 👏';
+            } else {
+                message = 'Good try! Review the guide and try again! 💪';
+            }
+
+            document.getElementById('quiz-score-text').innerHTML = `You scored ${quizScore} out of ${questions.length}!<br>${message}`;
+        }
+
+        function goBackToReviewFromQuiz() {
+            document.getElementById('quiz-screen').classList.add('hidden');
+            currentReviewPage = TOTAL_REVIEW_PAGES;
+            renderReviewPage();
+            document.getElementById('review-screen').classList.remove('hidden');
+        }
+
+        function backToReviewFromResults() {
+            document.getElementById('quiz-results-screen').classList.add('hidden');
+            currentReviewPage = TOTAL_REVIEW_PAGES;
+            renderReviewPage();
+            document.getElementById('review-screen').classList.remove('hidden');
+        }
+
+        function getGlossaryData() {
+            const name = playerData.name || '[Name]';
+            return [
+                {
+                    category: "Greetings & Politeness",
+                    words: [
+                        { en: "Hello", ph: "Kumusta", id: "Halo" },
+                        { en: "Good morning", ph: "Magandang umaga", id: "Selamat pagi" },
+                        { en: "Good afternoon", ph: "Magandang hapon", id: "Selamat siang" },
+                        { en: "Good evening", ph: "Magandang gabi", id: "Selamat malam" },
+                        { en: "Goodbye", ph: "Paalam", id: "Selamat tinggal" },
+                        { en: "Thank you", ph: "Salamat", id: "Terima kasih" },
+                        { en: "You're welcome", ph: "Walang anuman", id: "Sama-sama" },
+                        { en: "(word of respect - no direct translation)", ph: "Po", id: "(kata hormat)" },
+                        { en: "Yes (polite)", ph: "Opo", id: "Iya (sopan)" },
+                        { en: "Yes (casual)", ph: "Oo", id: "Ya" },
+                        { en: "No (polite)", ph: "Hindi po", id: "Tidak (sopan)" },
+                        { en: "No (casual)", ph: "Hindi", id: "Tidak" },
+                        { en: "Excuse me / Sorry", ph: "Paumanhin", id: "Maaf" }
+                    ]
+                },
+                {
+                    category: "People & Titles",
+                    words: [
+                        { en: "I", ph: "Ako", id: "Aku" },
+                        { en: "You", ph: "Ikaw / Kayo", id: "Kamu / Anda" },
+                        { en: `I am ${name}`, ph: `Ako si ${name}`, id: `Aku ${name}` },
+                        { en: "Grandmother", ph: "Lola", id: "Nenek" },
+                        { en: "Grandfather", ph: "Lolo", id: "Kakek" },
+                        { en: "Older brother / male elder", ph: "Kuya", id: "Kakak laki-laki" },
+                        { en: "Older sister / female elder", ph: "Ate", id: "Kakak perempuan" },
+                        { en: "Older man (guide/driver)", ph: "Manong", id: "Paman / Om" },
+                        { en: "Older woman (vendor/auntie)", ph: "Manang", id: "Bibi / Tante" },
+                        { en: "Friend", ph: "Kaibigan", id: "Teman" }
+                    ]
+                },
+                {
+                    category: "Question Words & Directions",
+                    words: [
+                        { en: "Where", ph: "Nasaan / Saan", id: "Di mana" },
+                        { en: "How", ph: "Paano", id: "Bagaimana" },
+                        { en: "How much", ph: "Magkano", id: "Berapa" },
+                        { en: "When", ph: "Kailan", id: "Kapan" },
+                        { en: "Who", ph: "Sino", id: "Siapa" },
+                        { en: "What", ph: "Ano", id: "Apa" },
+                        { en: "Straight ahead", ph: "Deretso", id: "Lurus" },
+                        { en: "Left", ph: "Kaliwa", id: "Kiri" },
+                        { en: "Right", ph: "Kanan", id: "Kanan" },
+                        { en: "Take care", ph: "Ingat", id: "Hati-hati" }
+                    ]
+                },
+                {
+                    category: "Culture & The Trip",
+                    words: [
+                        { en: "Public vehicle (jeepney)", ph: "Jeepney / Jeep", id: "Jeepney" },
+                        { en: "Hand-to-forehead blessing gesture", ph: "Mano po", id: "Salim (Indo.) / Salam (Malay.)" },
+                        { en: "I will miss you (to a friend)", ph: "Mami-miss kita", id: "Aku akan merindukanmu" },
+                        { en: "I will miss you (to an elder)", ph: "Mami-miss ko po kayo", id: "Aku akan merindukan Anda" },
+                        { en: "Welcome back", ph: "Maligayang pagbabalik", id: "Selamat datang kembali" }
+                    ]
+                },
+                {
+                    category: "Everyday Travel Essentials",
+                    words: [
+                        { en: "Water", ph: "Tubig", id: "Air" },
+                        { en: "Food", ph: "Pagkain", id: "Makanan" },
+                        { en: "Bathroom / Toilet", ph: "Banyo / CR", id: "Toilet" },
+                        { en: "Help", ph: "Tulong", id: "Tolong" },
+                        { en: "Airport", ph: "Paliparan", id: "Bandara" },
+                        { en: "Hotel", ph: "Otel", id: "Hotel" },
+                        { en: "Delicious", ph: "Masarap", id: "Enak" },
+                        { en: "Expensive", ph: "Mahal", id: "Mahal" },
+                        { en: "Cheap", ph: "Mura", id: "Murah" },
+                        { en: "Today", ph: "Ngayon", id: "Hari ini" },
+                        { en: "Tomorrow", ph: "Bukas", id: "Besok" },
+                        { en: "Yesterday", ph: "Kahapon", id: "Kemarin" },
+                        { en: "Money", ph: "Pera", id: "Uang" },
+                        { en: "Store / Shop", ph: "Tindahan", id: "Toko" },
+                        { en: "Market", ph: "Palengke", id: "Pasar" },
+                        { en: "Car / Vehicle", ph: "Sasakyan", id: "Kendaraan" },
+                        { en: "Street / Road", ph: "Kalye", id: "Jalan" },
+                        { en: "House / Home", ph: "Bahay", id: "Rumah" }
+                    ]
+                }
+            ];
+        }
+
+        function renderGlossary() {
+            const glossary = getGlossaryData();
+            const contentEl = document.getElementById('glossary-content');
+
+            contentEl.innerHTML = glossary.map(section => `
+                <div class="vocab-category">${section.category}</div>
+                <table class="vocab-table">
+                    <tr><th>English</th><th>Tagalog (PH)</th><th>Indonesian (ID)</th></tr>
+                    ${section.words.map(w => `
+                        <tr>
+                            <td class="vocab-en">${w.en}</td>
+                            <td class="vocab-ph">${w.ph}</td>
+                            <td class="vocab-id">${w.id}</td>
+                        </tr>
+                    `).join('')}
+                </table>
+            `).join('');
+        }
+
+        let glossaryOpenedFrom = 'results';
+
+        function openGlossary() {
+            glossaryOpenedFrom = document.getElementById('review-screen').classList.contains('hidden') ? 'results' : 'review';
+            document.getElementById('quiz-results-screen').classList.add('hidden');
+            document.getElementById('review-screen').classList.add('hidden');
+            renderGlossary();
+            document.getElementById('glossary-screen').classList.remove('hidden');
+        }
+
+        function closeGlossary() {
+            document.getElementById('glossary-screen').classList.add('hidden');
+            if (glossaryOpenedFrom === 'review') {
+                currentReviewPage = TOTAL_REVIEW_PAGES;
+                renderReviewPage();
+                document.getElementById('review-screen').classList.remove('hidden');
+            } else {
+                document.getElementById('quiz-results-screen').classList.remove('hidden');
+            }
+        }
+    </script>
+</body>
+</html>
